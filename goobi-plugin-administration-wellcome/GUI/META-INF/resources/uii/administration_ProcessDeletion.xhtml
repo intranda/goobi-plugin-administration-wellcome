@@ -1,0 +1,32 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <composite:interface>
+    </composite:interface>
+
+    <composite:implementation>
+        <h:form id="processDeletion" prependId="false">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="box box-color lightgrey box-bordered">
+                        <div class="box-title">
+                            <h3>
+                                <i class="fa fa-trash"></i>
+                                <h:outputText value="#{msgs[AdministrationForm.administrationPlugin.title]}" />
+                            </h3>
+                        </div>
+                        <div class="box-content">
+                            <intranda:formInputText name="identifier" label="#{msgs.bnumber}" field="#{AdministrationForm.administrationPlugin.bnumber}" help="#{msgs.helpbnumber}" fieldStyle="form-control" required="true" />
+                            <div class="form-actions">
+                                <h:commandLink value="#{msgs.deleteFromGoobi}" styleClass="btn btn-primary font-size-s margin-left-10" action="#{AdministrationForm.administrationPlugin.deleteFromGoobi}" />
+                                <h:commandLink value="#{msgs.deleteFromPlayer}" styleClass="btn btn-primary font-size-s margin-left-10" action="#{AdministrationForm.administrationPlugin.deleteFromPlayer}" />
+                                <h:commandLink value="#{msgs.deleteFromGoobiAndPlayer}" styleClass="btn btn-primary font-size-s margin-left-10" action="#{AdministrationForm.administrationPlugin.deleteFromGoobiAndPlayer}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+
+    </composite:implementation>
+
+</ui:composition>
