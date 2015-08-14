@@ -15,7 +15,7 @@
                             </h3>
                         </div>
                         <div class="box-content nopadding">
-                            <intranda:formInputText name="identifier" label="#{msgs.bnumber}" field="#{AdministrationForm.administrationPlugin.bnumber}" help="#{msgs.helpbnumber}" fieldStyle="form-control" required="false" />
+                            <intranda:formInputText name="identifier" label="#{msgs.bnumber}" field="#{AdministrationForm.administrationPlugin.bnumber}" help="#{msgs.helpDeleteBnumber}" fieldStyle="form-control" required="false" />
                             <div class="form-actions">
       							<h:commandLink styleClass="btn btn-danger font-size-s margin-left-10 pull-right margin-bottom-more block" action="#{AdministrationForm.administrationPlugin.deleteFromGoobiAndPlayer}" onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
       								<i class="fa fa-trash-o margin-right-5"></i>
