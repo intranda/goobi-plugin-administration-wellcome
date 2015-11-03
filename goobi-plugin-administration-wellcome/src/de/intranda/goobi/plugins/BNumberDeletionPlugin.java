@@ -3,6 +3,7 @@ package de.intranda.goobi.plugins;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 
 import de.sub.goobi.helper.Helper;
+import de.sub.goobi.helper.NIOFileUtils;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MetadataManager;
@@ -116,7 +118,9 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
             return "";
         } else {
             try {
-                Helper.deleteDir(new File(process.getProcessDataDirectory()));
+                NIOFileUtils.deleteDir(Paths.get(process.getProcessDataDirectory()));
+
+//                Helper.deleteDir(new File(process.getProcessDataDirectory()));
             } catch (SwapException | DAOException | IOException | InterruptedException e) {
 
             }
