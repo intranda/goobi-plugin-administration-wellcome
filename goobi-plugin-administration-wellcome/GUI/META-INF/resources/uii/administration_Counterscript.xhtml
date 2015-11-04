@@ -50,7 +50,7 @@
                         <h:outputText value="#{msgs.downloadCsv}" />
                     </h:commandLink>
                     <br />
-                    <x:dataTable id="counterscriptTable" styleClass="table table-hover table-nomargin dataTable table-bordered responsive" var="item" value="#{AdministrationForm.administrationPlugin.dataList}">
+                    <x:dataTable id="counterscriptTable" styleClass="table table-hover table-nomargin dataTable table-bordered responsive" var="item" value="#{AdministrationForm.administrationPlugin.paginatorList}">
 
                         <x:column styleClass="#{!item.active ? 'inactive':'active'}" rendered="false">
                             <f:facet name="header">
@@ -145,6 +145,50 @@
 
                     </x:dataTable>
 
+                    <div>
+                        <h:commandLink styleClass="btn font-size-s margin-sides-10" action="#{AdministrationForm.administrationPlugin.cmdMoveFirst}">
+                            <i class="fa fa-double-angle-left"></i>
+                            <f:ajax execute="@form" render="@form :qaform" />
+                        </h:commandLink>
+                        <h:commandLink styleClass="btn btn-primary font-size-s" action="#{AdministrationForm.administrationPlugin.cmdMovePrevious}">
+                            <i class="fa fa-angle-left"></i>
+                            <f:ajax execute="@form" render="@form :qaform" />
+                            <h:outputText value=" #{msgs.pagePrevious}" />
+                        </h:commandLink>
+
+                        <div class="margin-sides-10">
+                        <!-- aktuelle Seite anzeigen -->
+                            <x:outputText id="txtMoveTo1" forceId="true" value="#{msgs.seite} #{AdministrationForm.administrationPlugin.pageNumberCurrent} #{msgs.von} #{AdministrationForm.administrationPlugin.pageNumberLast}" onclick="document.getElementById('txtMoveTo2').style.display='inline';
+                   document.getElementById('txtMoveTo1').style.display='none'; 
+                   document.getElementById('txtMoveTo2').focus();
+                   document.getElementById('txtMoveTo2').select();" />
+
+                            <!-- Seite direkt anspringen -->
+                            <x:inputText id="txtMoveTo2" forceId="true" value="#{AdministrationForm.administrationPlugin.txtMoveTo}" style="display:none;font-size:9px;width:30px" required="true" onblur="document.getElementById('txtMoveTo2').style.display='none';
+                     document.getElementById('txtMoveTo1').style.display='inline';" onkeypress="return submitEnter('cmdMoveTo',event)" />
+                            <x:commandButton action="#{NavigationForm.Reload}" id="cmdMoveTo" forceId="true" value="go" style="display:none" />
+                        
+                        
+<!--                             <x:outputText value="#{msgs.seite} #{AdministrationForm.administrationPlugin.pageNumberCurrent} #{msgs.von} #{AdministrationForm.administrationPlugin.pageNumberLast}" onclick="document.getElementById('txtMoveTo2').style.display='inline'; -->
+<!--                 document.getElementById('txtMoveTo1').style.display='none';  -->
+<!--                 document.getElementById('txtMoveTo2').focus(); -->
+<!--                 document.getElementById('txtMoveTo2').select();" /> -->
+<!--                             Seite direkt anspringen -->
+<!--                             <x:inputText value="#{AdministrationForm.administrationPlugin.txtMoveTo}" style="display:none;font-size:9px;width:30px" required="true" onblur="document.getElementById('txtMoveTo2').style.display='none';document.getElementById('txtMoveTo1').style.display='inline';" onkeypress="return submitEnter('cmdMoveTo',event)" /> -->
+<!--                             <x:commandButton action="#{NavigationForm.Reload}" value="go" style="display:none" /> -->
+                        </div>
+
+                        <h:commandLink styleClass="btn btn-primary font-size-s" action="#{AdministrationForm.administrationPlugin.cmdMoveNext}">
+                            <h:outputText value="#{msgs.pageNext} " />
+                            <i class="fa fa-angle-right"></i>
+                            <f:ajax execute="@form" render="@form :qaform" />
+                        </h:commandLink>
+                        <h:commandLink styleClass="btn font-size-s margin-sides-10" action="#{AdministrationForm.administrationPlugin.cmdMoveLast}">
+                            <i class="fa fa-double-angle-right"></i>
+                            <f:ajax execute="@form" render="@form :qaform" />
+                        </h:commandLink>
+                    </div>
+
                 </div>
             </h:panelGroup>
         </h:form>
@@ -234,31 +278,6 @@
             </h:form>
         </h:panelGroup>
 
-        <script type="text/javascript">    
-        $(document).ready(function() {
-    $('#counterscriptTable').DataTable(
- 
-        );
-    
- 
-//	{
-    //   	ajax:           'http://localhost:8081/Counterscript/api/json',
-    //       scrollY:        20,
-    //       deferRender:    true,
-    //       scroller:       true
-   //  } 
-      });
-
-//      $(el).one('inview', function(event, isInView) {
-// 		if(isInView) {
-// 			var limit  = index+10;
-// 			for(index; index < limit; index++) {
-// 				var canvas = document.getElementById('canvas-' + index);
-// 				drawOnCanvas(canvas);
-// 			}
-// 		} 
-// 	});
-        </script>
 
     </composite:implementation>
 

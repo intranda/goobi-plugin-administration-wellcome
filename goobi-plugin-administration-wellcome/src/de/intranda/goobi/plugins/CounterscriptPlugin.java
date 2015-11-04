@@ -2,6 +2,7 @@ package de.intranda.goobi.plugins;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +36,12 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
 
     private List<MetadataInformation> dataList = null;
     private List<MetadataInformation> detailList = null;
+
+    private int NUMBER_OF_OBJECTS_PER_PAGE = 10;
+
+    private int pageNo = 0;
+
+    private int imageIndex = 0;
 
     @Override
     public PluginType getType() {
@@ -111,30 +118,95 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         } catch (IOException e) {
         }
     }
-    
-    
-    
-    public void getJson() {
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target("http://localhost:8081/Counterscript/api/");
-        WebTarget json = base.path("json");
-        if (includeOutdatedData) {
-            json = json.path("withinactive");
+
+    public List<MetadataInformation> getPaginatorList() {
+        List<MetadataInformation> subList = new ArrayList<MetadataInformation>();
+        if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
+            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
+        } else {
+            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
         }
 
-        if (startDate != null && endDate != null) {
-            String start = dateConverter.format(startDate);
-            String end = dateConverter.format(endDate);
-            json = json.path(start).path(end);
-        }
-
-        HttpServletResponse response = (HttpServletResponse) FacesContextHelper.getCurrentFacesContext().getExternalContext().getResponse();
-        response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\"");
-        try {
-            response.sendRedirect(json.getUri().toString());
-        } catch (IOException e) {
-        }
-
+        return subList;
     }
+
+    public String cmdMoveFirst() {
+        if (this.pageNo != 0) {
+            this.pageNo = 0;
+            getPaginatorList();
+        }
+        return "";
+    }
+
+    public String cmdMovePrevious() {
+        if (!isFirstPage()) {
+            this.pageNo--;
+            getPaginatorList();
+        }
+        return "";
+    }
+
+    public String cmdMoveNext() {
+        if (!isLastPage()) {
+            this.pageNo++;
+            getPaginatorList();
+        }
+        return "";
+    }
+
+    public String cmdMoveLast() {
+        if (this.pageNo != getLastPageNumber()) {
+            this.pageNo = getLastPageNumber();
+            getPaginatorList();
+        }
+        return "";
+    }
+
+    public void setTxtMoveTo(int neueSeite) {
+        if ((this.pageNo != neueSeite - 1) && neueSeite > 0 && neueSeite <= getLastPageNumber() + 1) {
+            this.pageNo = neueSeite - 1;
+            getPaginatorList();
+        }
+    }
+
+    public int getTxtMoveTo() {
+        return this.pageNo + 1;
+    }
+
+    public int getLastPageNumber() {
+        int ret = new Double(Math.floor(this.dataList.size() / NUMBER_OF_OBJECTS_PER_PAGE)).intValue();
+        if (this.dataList.size() % NUMBER_OF_OBJECTS_PER_PAGE == 0) {
+            ret--;
+        }
+        return ret;
+    }
+
+    public boolean isFirstPage() {
+        return this.pageNo == 0;
+    }
+
+    public boolean isLastPage() {
+        return this.pageNo >= getLastPageNumber();
+    }
+
+    public boolean hasNextPage() {
+        return this.dataList.size() > NUMBER_OF_OBJECTS_PER_PAGE;
+    }
+
+    public boolean hasPreviousPage() {
+        return this.pageNo > 0;
+    }
+
+    public Long getPageNumberCurrent() {
+        return Long.valueOf(this.pageNo + 1);
+    }
+
+    public Long getPageNumberLast() {
+        return Long.valueOf(getLastPageNumber() + 1);
+    }
+
+    public int getSizeOfImageList() {
+        return dataList.size();
+    }
+
 }
