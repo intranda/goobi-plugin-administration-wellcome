@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/javax.ws.rs-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/jsf-api-2.2.5.jar"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="/Goobi/webapp/WEB-INF/lib/commons-configuration-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

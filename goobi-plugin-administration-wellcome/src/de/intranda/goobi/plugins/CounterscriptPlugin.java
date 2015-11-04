@@ -15,15 +15,20 @@ import javax.ws.rs.core.GenericType;
 import lombok.Data;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
+import org.goobi.beans.User;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IAdministrationPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 
 import de.intranda.counterscript.model.MetadataInformation;
+import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.helper.FacesContextHelper;
+import de.sub.goobi.helper.Helper;
 
 @PluginImplementation
 public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin {
+
+    private String REST_URL = "http://localhost:8080/Counterscript/api/";
 
     private static final String TITLE = "Counterscript";
 
@@ -42,6 +47,15 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     private int pageNo = 0;
 
     private int imageIndex = 0;
+
+    public CounterscriptPlugin() {
+        User user = (User) Helper.getManagedBeanValue("#{LoginForm.myBenutzer}");
+        if (user != null) {
+            NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
+        }
+        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
+
+    }
 
     @Override
     public PluginType getType() {
@@ -65,7 +79,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
 
     public void getData() {
         Client client = ClientBuilder.newClient();
-        WebTarget base = client.target("http://localhost:8081/Counterscript/api/");
+        WebTarget base = client.target(REST_URL);
         WebTarget xml = base.path("xml");
         if (includeOutdatedData) {
             xml = xml.path("withinactive");
@@ -89,7 +103,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
 
     public void getDetails() {
         Client client = ClientBuilder.newClient();
-        WebTarget base = client.target("http://localhost:8081/Counterscript/api");
+        WebTarget base = client.target(REST_URL);
         WebTarget xml = base.path("xml");
         xml = xml.path("bnumber").path(currentNumber);
         detailList = xml.request().get(new GenericType<List<MetadataInformation>>() {
@@ -99,7 +113,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     public void download() {
 
         Client client = ClientBuilder.newClient();
-        WebTarget base = client.target("http://localhost:8081/Counterscript/api/");
+        WebTarget base = client.target(REST_URL);
         WebTarget csv = base.path("csv");
         if (includeOutdatedData) {
             csv = csv.path("withinactive");

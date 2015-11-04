@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config_plugin>
+    <rest_url>http://localhost:8081/Counterscript/api/</rest_url>
+</config_plugin>
