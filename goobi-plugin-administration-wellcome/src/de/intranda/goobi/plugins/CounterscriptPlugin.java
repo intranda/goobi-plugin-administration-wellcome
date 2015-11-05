@@ -1,17 +1,21 @@
 package de.intranda.goobi.plugins;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.faces.context.ExternalContext;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 
+import lombok.Cleanup;
 import lombok.Data;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
@@ -124,11 +128,28 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
             String end = dateConverter.format(endDate);
             csv = csv.path(start).path(end);
         }
-        HttpServletResponse response = (HttpServletResponse) FacesContextHelper.getCurrentFacesContext().getExternalContext().getResponse();
-        response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\"");
         try {
-            response.sendRedirect(csv.getUri().toString());
+            ExternalContext ec = FacesContextHelper.getCurrentFacesContext().getExternalContext();
+
+            ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the buffer beforehand. We want to get rid of them, else it may collide.
+            ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types. Use if necessary ExternalContext#getMimeType() for auto-detection based on filename.
+            ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As popup magic is done here. You can give it any file name you want, this only won't work in MSIE, it will use current request URL as file name instead.
+
+            OutputStream outStream = ec.getResponseOutputStream();
+
+
+            @Cleanup
+            InputStream inStream = csv.getUri().toURL().openStream();
+
+            byte[] buffer = new byte[1024];
+
+            int length;
+
+            while ((length = inStream.read(buffer)) > 0) {
+                outStream.write(buffer, 0, length);
+            }
+            FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to render the response which obviously will fail since it's already written with a file and closed.
+           
         } catch (IOException e) {
         }
     }
