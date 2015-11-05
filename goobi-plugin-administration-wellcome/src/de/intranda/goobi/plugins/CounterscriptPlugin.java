@@ -219,7 +219,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         return Long.valueOf(getLastPageNumber() + 1);
     }
 
-    public int getSizeOfImageList() {
+    public int getSizeOfDataList() {
         return dataList.size();
     }
 
