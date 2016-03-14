@@ -22,6 +22,7 @@ import org.jdom2.input.SAXBuilder;
 
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.NIOFileUtils;
+//import de.sub.goobi.helper.NIOFileUtils;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MetadataManager;
@@ -52,7 +53,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
         return "b-number deletion";
     }
 
-    @Override
+    
     public String getDescription() {
         return "b-number deletion";
     }

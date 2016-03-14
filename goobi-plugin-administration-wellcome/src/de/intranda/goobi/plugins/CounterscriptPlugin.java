@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 import javax.faces.context.ExternalContext;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -32,7 +31,7 @@ import de.sub.goobi.helper.Helper;
 @PluginImplementation
 public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin {
 
-    private String REST_URL = "http://localhost:8080/Counterscript/api/";
+    private String REST_URL = "http://localhost:8081/Counterscript/api/";
 
     private static final String TITLE = "Counterscript";
 
@@ -71,7 +70,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         return TITLE;
     }
 
-    @Override
+    
     public String getDescription() {
         return TITLE;
     }
