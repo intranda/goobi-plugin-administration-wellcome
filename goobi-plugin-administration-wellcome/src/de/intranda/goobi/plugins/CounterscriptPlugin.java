@@ -31,216 +31,236 @@ import de.sub.goobi.helper.Helper;
 @PluginImplementation
 public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin {
 
-    private String REST_URL = "http://localhost:8081/Counterscript/api/";
+	private String REST_URL = "http://localhost:8081/Counterscript/api/";
 
-    private static final String TITLE = "Counterscript";
+	private static final String TITLE = "Counterscript";
+	private static final String PLUGIN_TITLE = "plugin_intranda_counterscript";
+	private static final SimpleDateFormat dateConverter = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static final SimpleDateFormat dateConverter = new SimpleDateFormat("yyyy-MM-dd");
+	private Date startDate = null;
+	private Date endDate = null;
+	private boolean includeOutdatedData = false;
+	private String currentNumber;
 
-    private Date startDate = null;
-    private Date endDate = null;
-    private boolean includeOutdatedData = false;
-    private String currentNumber;
+	private List<MetadataInformation> dataList = null;
+	private List<MetadataInformation> detailList = null;
 
-    private List<MetadataInformation> dataList = null;
-    private List<MetadataInformation> detailList = null;
+	private int NUMBER_OF_OBJECTS_PER_PAGE = 10;
 
-    private int NUMBER_OF_OBJECTS_PER_PAGE = 10;
+	private int pageNo = 0;
 
-    private int pageNo = 0;
+	private int imageIndex = 0;
 
-    private int imageIndex = 0;
+	public CounterscriptPlugin() {
+		User user = (User) Helper.getManagedBeanValue("#{LoginForm.myBenutzer}");
+		if (user != null) {
+			NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
+		}
+		REST_URL = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_url",
+				"http://localhost:8080/Counterscript/api/");
+//        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
 
-    public CounterscriptPlugin() {
-        User user = (User) Helper.getManagedBeanValue("#{LoginForm.myBenutzer}");
-        if (user != null) {
-            NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
-        }
-        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
+	}
 
-    }
+	@Override
+	public PluginType getType() {
+		return PluginType.Administration;
+	}
 
-    @Override
-    public PluginType getType() {
-        return PluginType.Administration;
-    }
+	@Override
+	public String getTitle() {
+		return TITLE;
+	}
 
-    @Override
-    public String getTitle() {
-        return TITLE;
-    }
+	public String getDescription() {
+		return TITLE;
+	}
 
-    
-    public String getDescription() {
-        return TITLE;
-    }
+	@Override
+	public String getGui() {
+		return "/uii/administration_Counterscript.xhtml";
+	}
 
-    @Override
-    public String getGui() {
-        return "/uii/administration_Counterscript.xhtml";
-    }
+	public void getData() {
+		Client client = ClientBuilder.newClient();
+		WebTarget base = client.target(REST_URL);
+		WebTarget xml = base.path("xml");
+		if (includeOutdatedData) {
+			xml = xml.path("withinactive");
+		}
 
-    public void getData() {
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target(REST_URL);
-        WebTarget xml = base.path("xml");
-        if (includeOutdatedData) {
-            xml = xml.path("withinactive");
-        }
+		if (startDate != null && endDate != null) {
+			String start = dateConverter.format(startDate);
+			String end = dateConverter.format(endDate);
+			xml = xml.path(start).path(end);
+		}
 
-        if (startDate != null && endDate != null) {
-            String start = dateConverter.format(startDate);
-            String end = dateConverter.format(endDate);
-            xml = xml.path(start).path(end);
-        }
+		dataList = xml.request().get(new GenericType<List<MetadataInformation>>() {
+		});
 
-        dataList = xml.request().get(new GenericType<List<MetadataInformation>>() {
-        });
+	}
 
-    }
+	public void resetData() {
 
-    public void resetData() {
+		detailList = null;
+	}
 
-        detailList = null;
-    }
+	public void getDetails() {
+		Client client = ClientBuilder.newClient();
+		WebTarget base = client.target(REST_URL);
+		WebTarget xml = base.path("xml");
+		xml = xml.path("bnumber").path(currentNumber);
+		detailList = xml.request().get(new GenericType<List<MetadataInformation>>() {
+		});
+	}
 
-    public void getDetails() {
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target(REST_URL);
-        WebTarget xml = base.path("xml");
-        xml = xml.path("bnumber").path(currentNumber);
-        detailList = xml.request().get(new GenericType<List<MetadataInformation>>() {
-        });
-    }
+	public void download() {
 
-    public void download() {
+		Client client = ClientBuilder.newClient();
+		WebTarget base = client.target(REST_URL);
+		WebTarget csv = base.path("csv");
+		if (includeOutdatedData) {
+			csv = csv.path("withinactive");
+		}
 
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target(REST_URL);
-        WebTarget csv = base.path("csv");
-        if (includeOutdatedData) {
-            csv = csv.path("withinactive");
-        }
+		if (startDate != null && endDate != null) {
+			String start = dateConverter.format(startDate);
+			String end = dateConverter.format(endDate);
+			csv = csv.path(start).path(end);
+		}
+		try {
+			ExternalContext ec = FacesContextHelper.getCurrentFacesContext().getExternalContext();
 
-        if (startDate != null && endDate != null) {
-            String start = dateConverter.format(startDate);
-            String end = dateConverter.format(endDate);
-            csv = csv.path(start).path(end);
-        }
-        try {
-            ExternalContext ec = FacesContextHelper.getCurrentFacesContext().getExternalContext();
+			ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the
+								// buffer beforehand. We want to get rid of them, else it may collide.
+			ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types.
+													// Use if necessary ExternalContext#getMimeType() for auto-detection
+													// based on filename.
+			ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As
+																										// popup magic
+																										// is done here.
+																										// You can give
+																										// it any file
+																										// name you
+																										// want, this
+																										// only won't
+																										// work in MSIE,
+																										// it will use
+																										// current
+																										// request URL
+																										// as file name
+																										// instead.
 
-            ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the buffer beforehand. We want to get rid of them, else it may collide.
-            ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types. Use if necessary ExternalContext#getMimeType() for auto-detection based on filename.
-            ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As popup magic is done here. You can give it any file name you want, this only won't work in MSIE, it will use current request URL as file name instead.
+			OutputStream outStream = ec.getResponseOutputStream();
 
-            OutputStream outStream = ec.getResponseOutputStream();
+			@Cleanup
+			InputStream inStream = csv.getUri().toURL().openStream();
 
+			byte[] buffer = new byte[1024];
 
-            @Cleanup
-            InputStream inStream = csv.getUri().toURL().openStream();
+			int length;
 
-            byte[] buffer = new byte[1024];
+			while ((length = inStream.read(buffer)) > 0) {
+				outStream.write(buffer, 0, length);
+			}
+			FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to
+																			// render the response which obviously will
+																			// fail since it's already written with a
+																			// file and closed.
 
-            int length;
+		} catch (IOException e) {
+		}
+	}
 
-            while ((length = inStream.read(buffer)) > 0) {
-                outStream.write(buffer, 0, length);
-            }
-            FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to render the response which obviously will fail since it's already written with a file and closed.
-           
-        } catch (IOException e) {
-        }
-    }
+	public List<MetadataInformation> getPaginatorList() {
+		List<MetadataInformation> subList = new ArrayList<MetadataInformation>();
+		if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
+			subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE,
+					(pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
+		} else {
+			subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
+		}
 
-    public List<MetadataInformation> getPaginatorList() {
-        List<MetadataInformation> subList = new ArrayList<MetadataInformation>();
-        if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
-            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
-        } else {
-            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
-        }
+		return subList;
+	}
 
-        return subList;
-    }
+	public String cmdMoveFirst() {
+		if (this.pageNo != 0) {
+			this.pageNo = 0;
+			getPaginatorList();
+		}
+		return "";
+	}
 
-    public String cmdMoveFirst() {
-        if (this.pageNo != 0) {
-            this.pageNo = 0;
-            getPaginatorList();
-        }
-        return "";
-    }
+	public String cmdMovePrevious() {
+		if (!isFirstPage()) {
+			this.pageNo--;
+			getPaginatorList();
+		}
+		return "";
+	}
 
-    public String cmdMovePrevious() {
-        if (!isFirstPage()) {
-            this.pageNo--;
-            getPaginatorList();
-        }
-        return "";
-    }
+	public String cmdMoveNext() {
+		if (!isLastPage()) {
+			this.pageNo++;
+			getPaginatorList();
+		}
+		return "";
+	}
 
-    public String cmdMoveNext() {
-        if (!isLastPage()) {
-            this.pageNo++;
-            getPaginatorList();
-        }
-        return "";
-    }
+	public String cmdMoveLast() {
+		if (this.pageNo != getLastPageNumber()) {
+			this.pageNo = getLastPageNumber();
+			getPaginatorList();
+		}
+		return "";
+	}
 
-    public String cmdMoveLast() {
-        if (this.pageNo != getLastPageNumber()) {
-            this.pageNo = getLastPageNumber();
-            getPaginatorList();
-        }
-        return "";
-    }
+	public void setTxtMoveTo(int neueSeite) {
+		if ((this.pageNo != neueSeite - 1) && neueSeite > 0 && neueSeite <= getLastPageNumber() + 1) {
+			this.pageNo = neueSeite - 1;
+			getPaginatorList();
+		}
+	}
 
-    public void setTxtMoveTo(int neueSeite) {
-        if ((this.pageNo != neueSeite - 1) && neueSeite > 0 && neueSeite <= getLastPageNumber() + 1) {
-            this.pageNo = neueSeite - 1;
-            getPaginatorList();
-        }
-    }
+	public int getTxtMoveTo() {
+		return this.pageNo + 1;
+	}
 
-    public int getTxtMoveTo() {
-        return this.pageNo + 1;
-    }
+	public int getLastPageNumber() {
+		int ret = new Double(Math.floor(this.dataList.size() / NUMBER_OF_OBJECTS_PER_PAGE)).intValue();
+		if (this.dataList.size() % NUMBER_OF_OBJECTS_PER_PAGE == 0) {
+			ret--;
+		}
+		return ret;
+	}
 
-    public int getLastPageNumber() {
-        int ret = new Double(Math.floor(this.dataList.size() / NUMBER_OF_OBJECTS_PER_PAGE)).intValue();
-        if (this.dataList.size() % NUMBER_OF_OBJECTS_PER_PAGE == 0) {
-            ret--;
-        }
-        return ret;
-    }
+	public boolean isFirstPage() {
+		return this.pageNo == 0;
+	}
 
-    public boolean isFirstPage() {
-        return this.pageNo == 0;
-    }
+	public boolean isLastPage() {
+		return this.pageNo >= getLastPageNumber();
+	}
 
-    public boolean isLastPage() {
-        return this.pageNo >= getLastPageNumber();
-    }
+	public boolean hasNextPage() {
+		return this.dataList.size() > NUMBER_OF_OBJECTS_PER_PAGE;
+	}
 
-    public boolean hasNextPage() {
-        return this.dataList.size() > NUMBER_OF_OBJECTS_PER_PAGE;
-    }
+	public boolean hasPreviousPage() {
+		return this.pageNo > 0;
+	}
 
-    public boolean hasPreviousPage() {
-        return this.pageNo > 0;
-    }
+	public Long getPageNumberCurrent() {
+		return Long.valueOf(this.pageNo + 1);
+	}
 
-    public Long getPageNumberCurrent() {
-        return Long.valueOf(this.pageNo + 1);
-    }
+	public Long getPageNumberLast() {
+		return Long.valueOf(getLastPageNumber() + 1);
+	}
 
-    public Long getPageNumberLast() {
-        return Long.valueOf(getLastPageNumber() + 1);
-    }
-
-    public int getSizeOfDataList() {
-        return dataList.size();
-    }
+	public int getSizeOfDataList() {
+		return dataList.size();
+	}
 
 }
