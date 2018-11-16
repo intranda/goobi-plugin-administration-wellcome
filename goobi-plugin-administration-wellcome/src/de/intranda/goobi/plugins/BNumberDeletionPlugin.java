@@ -8,28 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.goobi.beans.Process;
 import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IAdministrationPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import de.sub.goobi.helper.Helper;
-import de.sub.goobi.helper.NIOFileUtils;
+import de.sub.goobi.helper.StorageProvider;
 //import de.sub.goobi.helper.NIOFileUtils;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MetadataManager;
 import de.sub.goobi.persistence.managers.ProcessManager;
-
-import org.goobi.beans.Process;
-
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 @PluginImplementation
@@ -53,7 +51,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
         return "b-number deletion";
     }
 
-    
+
     public String getDescription() {
         return "b-number deletion";
     }
@@ -119,9 +117,9 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
             return "";
         } else {
             try {
-                NIOFileUtils.deleteDir(Paths.get(process.getProcessDataDirectory()));
+                StorageProvider.getInstance().deleteDir(Paths.get(process.getProcessDataDirectory()));
 
-//                Helper.deleteDir(new File(process.getProcessDataDirectory()));
+                //                Helper.deleteDir(new File(process.getProcessDataDirectory()));
             } catch (SwapException | DAOException | IOException | InterruptedException e) {
 
             }
@@ -190,7 +188,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
                     FileUtils.forceDelete(anchorFile);
                 } else {
                     // remove volume from anchor
-                    List<Element> volumesToKeep = new ArrayList<Element>();
+                    List<Element> volumesToKeep = new ArrayList<>();
                     for (Element volume : volumes) {
                         Element mptr = volume.getChild("mptr", metsNamespace);
                         String volumeIdentifier = mptr.getAttributeValue("href", xlinkNamespace);
