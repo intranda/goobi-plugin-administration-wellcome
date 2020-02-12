@@ -1,10 +1,21 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+<ui:composition
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:x="http://myfaces.apache.org/tomahawk"
+    xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
 
     <composite:interface>
     </composite:interface>
 
     <composite:implementation>
-        <h:form id="processDeletion" prependId="false" styleClass="form-horizontal form-bordered">
+        <h:form
+            id="processDeletion"
+            prependId="false"
+            styleClass="form-horizontal form-bordered">
             <div class="row">
                 <div class="col-sm-12">
                     <div class="box box-color box-bordered lightgrey">
@@ -15,27 +26,41 @@
                             </h3>
                         </div>
                         <div class="box-content nopadding">
-                            <intranda:formInputText name="identifier" label="#{msgs.bnumber}" field="#{AdministrationForm.administrationPlugin.bnumber}" help="#{msgs.helpDeleteBnumber}" fieldStyle="form-control" required="false" />
+                            <intranda:formInputText
+                                name="identifier"
+                                label="#{msgs.bnumber}"
+                                field="#{AdministrationForm.administrationPlugin.bnumber}"
+                                help="#{msgs.helpDeleteBnumber}"
+                                fieldStyle="form-control"
+                                required="false" />
                             <div class="form-actions">
-      							<h:commandLink styleClass="btn btn-danger font-size-s margin-left-10 pull-right margin-bottom-more block" action="#{AdministrationForm.administrationPlugin.deleteFromGoobiAndPlayer}" onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-      								<i class="fa fa-trash-o margin-right-5"></i>
-									<h:outputText value="#{msgs.deleteFromGoobiAndPlayer}" />
-								</h:commandLink>
-                                <h:commandLink styleClass="btn btn-danger font-size-s margin-left-10  pull-right margin-bottom-more block" action="#{AdministrationForm.administrationPlugin.deleteFromPlayer}" onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-      								<i class="fa fa-trash-o margin-right-5"></i>
-									<h:outputText value="#{msgs.deleteFromPlayer}" />
-								</h:commandLink>
-                                <h:commandLink styleClass="btn btn-danger font-size-s margin-left-10 pull-right margin-bottom-more block" action="#{AdministrationForm.administrationPlugin.deleteFromGoobi}" onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-      								<i class="fa fa-trash-o margin-right-5"></i>
-									<h:outputText value="#{msgs.deleteFromGoobi}" />
-								</h:commandLink>
-                          </div>
+                                <h:commandLink
+                                    styleClass="btn btn-danger font-size-s margin-left-10 pull-right margin-bottom-more block"
+                                    action="#{AdministrationForm.administrationPlugin.deleteFromGoobiAndPlayer}"
+                                    onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
+                                    <i class="fa fa-trash-o margin-right-5"></i>
+                                    <h:outputText value="#{msgs.deleteFromGoobiAndStorageService}" />
+                                </h:commandLink>
+                                <h:commandLink
+                                    styleClass="btn btn-danger font-size-s margin-left-10  pull-right margin-bottom-more block"
+                                    action="#{AdministrationForm.administrationPlugin.deleteFromPlayer}"
+                                    onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
+                                    <i class="fa fa-trash-o margin-right-5"></i>
+                                    <h:outputText value="#{msgs.deleteFromStorageService}" />
+                                </h:commandLink>
+                                <h:commandLink
+                                    styleClass="btn btn-danger font-size-s margin-left-10 pull-right margin-bottom-more block"
+                                    action="#{AdministrationForm.administrationPlugin.deleteFromGoobi}"
+                                    onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
+                                    <i class="fa fa-trash-o margin-right-5"></i>
+                                    <h:outputText value="#{msgs.deleteFromGoobi}" />
+                                </h:commandLink>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </h:form>
-
     </composite:implementation>
 
 </ui:composition>
