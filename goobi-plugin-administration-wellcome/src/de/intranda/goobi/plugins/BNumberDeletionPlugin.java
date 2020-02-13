@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.goobi.beans.Process;
+import org.goobi.beans.Step;
 import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IAdministrationPlugin;
@@ -14,11 +15,14 @@ import org.goobi.production.plugin.interfaces.IPlugin;
 
 import de.sub.goobi.helper.BeanHelper;
 import de.sub.goobi.helper.Helper;
+import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.StorageProvider;
+import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MetadataManager;
 import de.sub.goobi.persistence.managers.ProcessManager;
+import de.sub.goobi.persistence.managers.StepManager;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -70,6 +74,14 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
     private Process getProcessId() {
         Process process = null;
+
+        List<Process> processlist = ProcessManager.getProcesses("titel", bnumber);
+        for (Process proc : processlist) {
+            if (proc.getTitel().endsWith(bnumber)) {
+                return process;
+            }
+        }
+
         List<Integer> processIdList = MetadataManager.getProcessesWithMetadata("CatalogIDDigital", bnumber);
         Integer processId = null;
         if (processIdList.size() > 1) {
@@ -208,6 +220,14 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
         } catch (PreferencesException | TypeNotAllowedForParentException | TypeNotAllowedAsChildException | MetadataTypeNotAllowedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+
+        List<Step> steps = StepManager.getStepsForProcess(process.getId());
+        for (Step s : steps) {
+            if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+                ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
+                myThread.start();
+            }
         }
 
         return "";
