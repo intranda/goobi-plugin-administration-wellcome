@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.goobi.beans.Process;
 import org.goobi.beans.Step;
 import org.goobi.production.cli.helper.StringPair;
@@ -69,19 +70,22 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
     }
 
     public void setBnumber(String bnumber) {
+        if (StringUtils.isNotBlank(bnumber)) {
+            bnumber = bnumber.trim();
+        }
         this.bnumber = bnumber;
     }
 
     private Process getProcessId() {
-        Process process = null;
 
-        List<Process> processlist = ProcessManager.getProcesses("titel", bnumber);
+        List<Process> processlist = ProcessManager.getProcesses("prozesse.titel", "prozesse.titel like '%" + bnumber + "'");
         for (Process proc : processlist) {
             if (proc.getTitel().endsWith(bnumber)) {
-                return process;
+                return proc;
             }
         }
 
+        Process process = null;
         List<Integer> processIdList = MetadataManager.getProcessesWithMetadata("CatalogIDDigital", bnumber);
         Integer processId = null;
         if (processIdList.size() > 1) {
@@ -155,7 +159,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
         // read bag information
 
-        Process template = ProcessManager.getProcessByExactTitle("volume_deletion__from_storage_service");
+        Process template = ProcessManager.getProcessByExactTitle("volume_deletion_from_storage_service");
         Process process = new Process();
         process.setTitel(dateFormat.format(new Date()) + "_" + bnumber + "_deletion");
 
