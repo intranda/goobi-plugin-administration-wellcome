@@ -1,45 +1,50 @@
 package de.intranda.goobi.plugins;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.goobi.beans.Process;
+import org.goobi.beans.Step;
 import org.goobi.production.cli.helper.StringPair;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IAdministrationPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.Namespace;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 
+import de.sub.goobi.helper.BeanHelper;
 import de.sub.goobi.helper.Helper;
+import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
 import de.sub.goobi.helper.StorageProvider;
-//import de.sub.goobi.helper.NIOFileUtils;
+import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.MetadataManager;
 import de.sub.goobi.persistence.managers.ProcessManager;
+import de.sub.goobi.persistence.managers.StepManager;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
+import ugh.dl.DigitalDocument;
+import ugh.dl.DocStruct;
+import ugh.dl.Metadata;
+import ugh.dl.MetadataType;
+import ugh.dl.Prefs;
+import ugh.exceptions.MetadataTypeNotAllowedException;
+import ugh.exceptions.PreferencesException;
+import ugh.exceptions.TypeNotAllowedAsChildException;
+import ugh.exceptions.TypeNotAllowedForParentException;
+import ugh.exceptions.WriteException;
+import ugh.fileformats.mets.MetsMods;
 
 @PluginImplementation
 public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
     private String bnumber;
 
-    private String destination = "/mnt/export/";
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private Namespace metsNamespace = Namespace.getNamespace("mets", "http://www.loc.gov/METS/");
-
-    private Namespace xlinkNamespace = Namespace.getNamespace("xlink", "http://www.w3.org/1999/xlink");
+    private BeanHelper bHelper = new BeanHelper();
 
     @Override
     public PluginType getType() {
@@ -50,7 +55,6 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
     public String getTitle() {
         return "b-number deletion";
     }
-
 
     public String getDescription() {
         return "b-number deletion";
@@ -66,10 +70,21 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
     }
 
     public void setBnumber(String bnumber) {
+        if (StringUtils.isNotBlank(bnumber)) {
+            bnumber = bnumber.trim();
+        }
         this.bnumber = bnumber;
     }
 
     private Process getProcessId() {
+
+        List<Process> processlist = ProcessManager.getProcesses("prozesse.titel", "prozesse.titel like '%" + bnumber + "'");
+        for (Process proc : processlist) {
+            if (proc.getTitel().endsWith(bnumber)) {
+                return proc;
+            }
+        }
+
         Process process = null;
         List<Integer> processIdList = MetadataManager.getProcessesWithMetadata("CatalogIDDigital", bnumber);
         Integer processId = null;
@@ -133,92 +148,91 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
     public String deleteFromPlayer() {
         String identifier = bnumber;
+        String anchorIdentifier = null;
         boolean mmo = false;
         if (bnumber.contains("_")) {
             // MMO file
-            identifier = identifier.substring(0, identifier.lastIndexOf("_"));
+            anchorIdentifier = identifier.substring(0, identifier.lastIndexOf("_"));
             mmo = true;
         }
 
-        String first = identifier.substring(identifier.length() - 1);
-        String second = identifier.substring(identifier.length() - 2, identifier.length() - 1);
-        String third = identifier.substring(identifier.length() - 3, identifier.length() - 2);
-        String fourth = identifier.substring(identifier.length() - 4, identifier.length() - 3);
+        // read bag information
 
-        File destinationFolder = new File(destination + first + File.separator + second + File.separator + third + File.separator + fourth);
+        Process template = ProcessManager.getProcessByExactTitle("volume_deletion_from_storage_service");
+        Process process = new Process();
+        process.setTitel(dateFormat.format(new Date()) + "_" + bnumber + "_deletion");
 
-        File fileToDelete = new File(destinationFolder, bnumber + ".xml");
-        if (!fileToDelete.exists()) {
+        process.setIstTemplate(false);
+        process.setInAuswahllisteAnzeigen(false);
+        process.setProjekt(template.getProjekt());
+        process.setRegelsatz(template.getRegelsatz());
+        process.setDocket(template.getDocket());
 
-            Helper.setFehlerMeldung("File " + bnumber + ".xml was not found in player location.");
-            return "";
-        } else {
-            try {
-                Document doc = new SAXBuilder().build(fileToDelete);
-                List<Element> structMaps = doc.getRootElement().getChildren("structMap", metsNamespace);
+        bHelper.SchritteKopieren(template, process);
+        bHelper.ScanvorlagenKopieren(template, process);
+        bHelper.WerkstueckeKopieren(template, process);
+        bHelper.EigenschaftenKopieren(template, process);
 
-                if (structMaps.size() == 1) {
-                    Helper.setFehlerMeldung("File " + bnumber + ".xml is an anchor file. "
-                            + "You have to remove the volumes, the anchor file gets removed automatically after all volumes are deleted.");
-                    return "";
-                }
+        // create simple mets file - monograph or mmo/monographic manifestation
+        // add identifier fields
 
-            } catch (JDOMException | IOException e) {
+        try {
+            ProcessManager.saveProcess(process);
+        } catch (DAOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
+        try {
+            Prefs prefs = process.getRegelsatz().getPreferences();
+            MetsMods metsMods = new MetsMods(prefs);
+            DigitalDocument digitalDocument = new DigitalDocument();
+            metsMods.setDigitalDocument(digitalDocument);
+            DocStruct physical = digitalDocument.createDocStruct(prefs.getDocStrctTypeByName("BoundBook"));
+            digitalDocument.setPhysicalDocStruct(physical);
+            MetadataType mdt = prefs.getMetadataTypeByName("CatalogIDDigital");
+            if (mmo) {
+                DocStruct anchor = digitalDocument.createDocStruct(prefs.getDocStrctTypeByName("MultipleManifestation"));
+                DocStruct volume = digitalDocument.createDocStruct(prefs.getDocStrctTypeByName("MonographManifestation"));
+                digitalDocument.setLogicalDocStruct(anchor);
+                anchor.addChild(volume);
+
+                Metadata identifierAnchor = new Metadata(mdt);
+                identifierAnchor.setValue(anchorIdentifier);
+                anchor.addMetadata(identifierAnchor);
+
+                Metadata identifierVolume = new Metadata(mdt);
+                identifierVolume.setValue(identifier);
+                volume.addMetadata(identifierVolume);
+
+            } else {
+                DocStruct volume = digitalDocument.createDocStruct(prefs.getDocStrctTypeByName("Monograph"));
+                digitalDocument.setLogicalDocStruct(volume);
+                Metadata identifierVolume = new Metadata(mdt);
+                identifierVolume.setValue(identifier);
+                volume.addMetadata(identifierVolume);
             }
 
             try {
-                FileUtils.forceDelete(fileToDelete);
-                Helper.setMeldung("File " + bnumber + ".xml was deleted from player location");
-            } catch (IOException e) {
-                Helper.setFehlerMeldung("Cannot delete file " + bnumber + ".xml", e);
+                process.writeMetadataFile(metsMods);
+            } catch (WriteException | IOException | InterruptedException | SwapException | DAOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        } catch (PreferencesException | TypeNotAllowedForParentException | TypeNotAllowedAsChildException | MetadataTypeNotAllowedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        List<Step> steps = StepManager.getStepsForProcess(process.getId());
+        for (Step s : steps) {
+            if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+                ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
+                myThread.start();
             }
         }
-        if (mmo) {
-            // update anchor file or remove it
-            File anchorFile = new File(destinationFolder, identifier + ".xml");
 
-            try {
-                Document doc = new SAXBuilder().build(anchorFile);
-                Element structMap = doc.getRootElement().getChild("structMap", metsNamespace);
-                Element mmoElement = structMap.getChild("div", metsNamespace);
-                List<Element> volumes = mmoElement.getChildren("div", metsNamespace);
-                if (volumes.size() == 1) {
-                    // last volume, remove anchor as well
-                    FileUtils.forceDelete(anchorFile);
-                } else {
-                    // remove volume from anchor
-                    List<Element> volumesToKeep = new ArrayList<>();
-                    for (Element volume : volumes) {
-                        Element mptr = volume.getChild("mptr", metsNamespace);
-                        String volumeIdentifier = mptr.getAttributeValue("href", xlinkNamespace);
-                        if (!volumeIdentifier.equals(bnumber)) {
-
-                            volumesToKeep.add(volume);
-                        }
-                    }
-
-                    mmoElement.removeContent();
-                    mmoElement.addContent(volumesToKeep);
-                    // save
-                    XMLOutputter outputter = new XMLOutputter(Format.getPrettyFormat());
-                    FileOutputStream output = new FileOutputStream(anchorFile);
-                    outputter.output(doc, output);
-                }
-
-            } catch (JDOMException | IOException e) {
-
-            }
-
-        }
-        // delete alto as well
-        File altoFolder = new File(destinationFolder, bnumber + "_alto");
-        if (altoFolder.exists()) {
-            try {
-                FileUtils.deleteDirectory(altoFolder);
-            } catch (IOException e) {
-            }
-        }
         return "";
     }
 

@@ -14,10 +14,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 
-import lombok.Cleanup;
-import lombok.Data;
-import net.xeoh.plugins.base.annotations.PluginImplementation;
-
 import org.goobi.beans.User;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IAdministrationPlugin;
@@ -27,14 +23,18 @@ import de.intranda.counterscript.model.MetadataInformation;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.helper.FacesContextHelper;
 import de.sub.goobi.helper.Helper;
+import lombok.Cleanup;
+import lombok.Data;
+import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 @PluginImplementation
 public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin {
 
     private String REST_URL = "http://localhost:8081/Counterscript/api/";
+    private String token;
 
     private static final String TITLE = "Counterscript";
-
+    private static final String PLUGIN_TITLE = "intranda_counterscript";
     private static final SimpleDateFormat dateConverter = new SimpleDateFormat("yyyy-MM-dd");
 
     private Date startDate = null;
@@ -56,7 +56,10 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         if (user != null) {
             NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
         }
-        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
+        REST_URL = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_url",
+                "http://localhost:8080/Counterscript/api/");
+        token =  ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_token");
+        //        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
 
     }
 
@@ -70,7 +73,6 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         return TITLE;
     }
 
-    
     public String getDescription() {
         return TITLE;
     }
@@ -93,8 +95,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
             String end = dateConverter.format(endDate);
             xml = xml.path(start).path(end);
         }
-
-        dataList = xml.request().get(new GenericType<List<MetadataInformation>>() {
+        dataList = xml.request().header("token", token).get(new GenericType<List<MetadataInformation>>() {
         });
 
     }
@@ -109,7 +110,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         WebTarget base = client.target(REST_URL);
         WebTarget xml = base.path("xml");
         xml = xml.path("bnumber").path(currentNumber);
-        detailList = xml.request().get(new GenericType<List<MetadataInformation>>() {
+        detailList = xml.request().header("token", token).get(new GenericType<List<MetadataInformation>>() {
         });
     }
 
@@ -127,15 +128,31 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
             String end = dateConverter.format(endDate);
             csv = csv.path(start).path(end);
         }
+        csv = csv.queryParam("token", token);
         try {
             ExternalContext ec = FacesContextHelper.getCurrentFacesContext().getExternalContext();
 
-            ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the buffer beforehand. We want to get rid of them, else it may collide.
-            ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types. Use if necessary ExternalContext#getMimeType() for auto-detection based on filename.
-            ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As popup magic is done here. You can give it any file name you want, this only won't work in MSIE, it will use current request URL as file name instead.
+            ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the
+            // buffer beforehand. We want to get rid of them, else it may collide.
+            ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types.
+            // Use if necessary ExternalContext#getMimeType() for auto-detection
+            // based on filename.
+            ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As
+            // popup magic
+            // is done here.
+            // You can give
+            // it any file
+            // name you
+            // want, this
+            // only won't
+            // work in MSIE,
+            // it will use
+            // current
+            // request URL
+            // as file name
+            // instead.
 
             OutputStream outStream = ec.getResponseOutputStream();
-
 
             @Cleanup
             InputStream inStream = csv.getUri().toURL().openStream();
@@ -147,16 +164,20 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
             while ((length = inStream.read(buffer)) > 0) {
                 outStream.write(buffer, 0, length);
             }
-            FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to render the response which obviously will fail since it's already written with a file and closed.
-           
+            FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to
+            // render the response which obviously will
+            // fail since it's already written with a
+            // file and closed.
+
         } catch (IOException e) {
         }
     }
 
     public List<MetadataInformation> getPaginatorList() {
-        List<MetadataInformation> subList = new ArrayList<MetadataInformation>();
+        List<MetadataInformation> subList = new ArrayList<>();
         if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
-            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
+            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE,
+                    (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
         } else {
             subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
         }
