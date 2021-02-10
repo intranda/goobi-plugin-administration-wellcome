@@ -52,7 +52,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     private int imageIndex = 0;
 
     public CounterscriptPlugin() {
-        User user = (User) Helper.getManagedBeanValue("#{LoginForm.myBenutzer}");
+        User user = Helper.getCurrentUser();
         if (user != null) {
             NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
         }
