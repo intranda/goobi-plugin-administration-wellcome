@@ -56,9 +56,8 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         if (user != null) {
             NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
         }
-        REST_URL = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_url",
-                "http://localhost:8080/Counterscript/api/");
-        token =  ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_token");
+        REST_URL = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_url", "http://localhost:8080/Counterscript/api/");
+        token = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_token");
         //        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
 
     }
@@ -175,13 +174,13 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
 
     public List<MetadataInformation> getPaginatorList() {
         List<MetadataInformation> subList = new ArrayList<>();
-        if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
-            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE,
-                    (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
-        } else {
-            subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
+        if (dataList != null) {
+            if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
+                subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
+            } else {
+                subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
+            }
         }
-
         return subList;
     }
 
