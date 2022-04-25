@@ -3,7 +3,7 @@ Goobi workflow Plugin: goobi-plugin-administration-wellcome
 
 <img src="https://goobi.io/wp-content/uploads/logo_goobi_plugin.png" align="right" style="margin:0 0 20px 20px;" alt="Plugin for Goobi workflow" width="175" height="109">
 
-This is an Administration plugin for Goobi workflow that is called counterscript. It collects and visualizes data related to exported records, b-number plugin allowes deletion of records in goobi and archive service.
+This is a set of two Administration plugins for Goobi workflow. The first one collects and visualizes data related to exported records, b-number plugin allowes deletion of records in goobi and archive service. It is responsible for counting of exported Goobi processes and analyses the metadata to be published. The second one allows to define an identifier that shall be used to delete data from Goobi workflow, from the Storage Archive Service or from both.
 
 This is a plugin for Goobi workflow, the open source workflow tracking software for digitisation projects. More information about Goobi workflow is available under https://goobi.io. If you want to get in touch with the user community simply go to https://community.goobi.io.
 
