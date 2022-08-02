@@ -135,7 +135,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
                 StorageProvider.getInstance().deleteDir(Paths.get(process.getProcessDataDirectory()));
 
                 //                Helper.deleteDir(new File(process.getProcessDataDirectory()));
-            } catch (SwapException | DAOException | IOException | InterruptedException e) {
+            } catch (SwapException | IOException e) {
 
             }
 
@@ -215,7 +215,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
             try {
                 process.writeMetadataFile(metsMods);
-            } catch (WriteException | IOException | InterruptedException | SwapException | DAOException e) {
+            } catch (WriteException | IOException | SwapException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
