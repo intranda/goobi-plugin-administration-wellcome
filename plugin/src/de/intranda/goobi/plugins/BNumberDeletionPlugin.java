@@ -78,7 +78,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
     private Process getProcessId() {
 
-        List<Process> processlist = ProcessManager.getProcesses("prozesse.titel", "prozesse.titel like '%" + bnumber + "'");
+        List<Process> processlist = ProcessManager.getProcesses("prozesse.titel", "prozesse.titel like '%" + bnumber + "'", null);
         for (Process proc : processlist) {
             if (proc.getTitel().endsWith(bnumber)) {
                 return proc;
@@ -93,7 +93,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
                 // found more than one, maybe we have an anchor identifier
                 List<StringPair> spl = MetadataManager.getMetadata(id);
                 for (StringPair sp : spl) {
-                    if (sp.getOne().trim().equals("CatalogIDDigital")) {
+                    if ("CatalogIDDigital".equals(sp.getOne().trim())) {
                         String value = sp.getTwo();
                         String[] parts = value.split(";");
                         int maxLength = 0;
@@ -227,7 +227,7 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
         List<Step> steps = StepManager.getStepsForProcess(process.getId());
         for (Step s : steps) {
-            if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+            if (StepStatus.OPEN.equals(s.getBearbeitungsstatusEnum()) && s.isTypAutomatisch()) {
                 ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
                 myThread.start();
             }
