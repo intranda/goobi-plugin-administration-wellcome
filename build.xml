@@ -3,7 +3,7 @@
 		<exec executable="mvn">
 			<arg value="package"/>
 		</exec>
-		<copy file="module-gui/target/plugin_intranda_administration_wellcome-GUI.jar" todir="/opt/digiverso/goobi/plugins/GUI/"/>
-		<copy file="module-main/target/plugin_intranda_administration_wellcome.jar" todir="/opt/digiverso/goobi/plugins/administration/"/>
+		<copy file="module-gui/target/plugin-administration-wellcome-gui.jar" todir="/opt/digiverso/goobi/plugins/GUI/"/>
+		<copy file="module-base/target/plugin-administration-wellcome-base.jar" todir="/opt/digiverso/goobi/plugins/administration/"/>
 	</target>
 </project>
