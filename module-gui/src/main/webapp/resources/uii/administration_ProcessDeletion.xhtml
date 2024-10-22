@@ -32,7 +32,9 @@
                         styleClass="btn btn-blank"
                         action="#{AdministrationForm.administrationPlugin.deleteFromGoobiAndPlayer}"
                         onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-                        <span class="fa fa-trash-o" />
+                        <span
+                            aria-hidden="true"
+                            class="fa fa-trash-o" />
                         <span>
                             <h:outputText value="#{msgs.deleteFromGoobiAndStorageService}" />
                         </span>
@@ -41,16 +43,20 @@
                         styleClass="btn btn-blank"
                         action="#{AdministrationForm.administrationPlugin.deleteFromPlayer}"
                         onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-                        <span class="fa fa-trash-o" />
+                        <span
+                            aria-hidden="true"
+                            class="fa fa-trash-o" />
                         <span>
                             <h:outputText value="#{msgs.deleteFromStorageService}" />
                         </span>
                     </h:commandLink>
                     <h:commandLink
-                        styleClass="btn btn-danger"
+                        styleClass="btn btn-neutral-600"
                         action="#{AdministrationForm.administrationPlugin.deleteFromGoobi}"
                         onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-                        <span class="fa fa-trash-o" />
+                        <span
+                            aria-hidden="true"
+                            class="fa fa-trash-o" />
                         <span>
                             <h:outputText value="#{msgs.deleteFromGoobi}" />
                         </span>
