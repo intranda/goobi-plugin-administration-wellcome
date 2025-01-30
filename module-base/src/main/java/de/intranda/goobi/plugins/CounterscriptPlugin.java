@@ -8,21 +8,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.faces.context.ExternalContext;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
-
 import org.goobi.beans.User;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.plugin.interfaces.IAdministrationPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
+import org.jfree.util.Log;
 
 import de.intranda.counterscript.model.MetadataInformation;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.helper.FacesContextHelper;
 import de.sub.goobi.helper.Helper;
+import jakarta.faces.context.ExternalContext;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.GenericType;
 import lombok.Cleanup;
 import lombok.Data;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
@@ -30,7 +30,8 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 @PluginImplementation
 public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin {
 
-    private String REST_URL = "http://localhost:8081/Counterscript/api/";
+    private static final long serialVersionUID = 2320742556608952269L;
+    private String restUrl = "http://localhost:8081/Counterscript/api/";
     private String token;
 
     private static final String TITLE = "Counterscript";
@@ -42,10 +43,10 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     private boolean includeOutdatedData = false;
     private String currentNumber;
 
-    private List<MetadataInformation> dataList = null;
-    private List<MetadataInformation> detailList = null;
+    private transient List<MetadataInformation> dataList = null;
+    private transient List<MetadataInformation> detailList = null;
 
-    private int NUMBER_OF_OBJECTS_PER_PAGE = 10;
+    private int entriesPerPage = 10;
 
     private int pageNo = 0;
 
@@ -54,11 +55,10 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     public CounterscriptPlugin() {
         User user = Helper.getCurrentUser();
         if (user != null) {
-            NUMBER_OF_OBJECTS_PER_PAGE = user.getTabellengroesse();
+            entriesPerPage = user.getTabellengroesse();
         }
-        REST_URL = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_url", "http://localhost:8080/Counterscript/api/");
+        restUrl = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_url", "http://localhost:8080/Counterscript/api/");
         token = ConfigPlugins.getPluginConfig(PLUGIN_TITLE).getString("rest_token");
-        //        REST_URL = ConfigPlugins.getPluginConfig(this).getString("rest_url", "http://localhost:8080/Counterscript/api/");
 
     }
 
@@ -72,31 +72,27 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
         return TITLE;
     }
 
-    public String getDescription() {
-        return TITLE;
-    }
-
     @Override
     public String getGui() {
         return "/uii/administration_Counterscript.xhtml";
     }
 
     public void getData() {
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target(REST_URL);
-        WebTarget xml = base.path("xml");
-        if (includeOutdatedData) {
-            xml = xml.path("withinactive");
-        }
+        try (Client client = ClientBuilder.newClient()) {
+            WebTarget base = client.target(restUrl);
+            WebTarget xml = base.path("xml");
+            if (includeOutdatedData) {
+                xml = xml.path("withinactive");
+            }
 
-        if (startDate != null && endDate != null) {
-            String start = dateConverter.format(startDate);
-            String end = dateConverter.format(endDate);
-            xml = xml.path(start).path(end);
+            if (startDate != null && endDate != null) {
+                String start = dateConverter.format(startDate);
+                String end = dateConverter.format(endDate);
+                xml = xml.path(start).path(end);
+            }
+            dataList = xml.request().header("token", token).get(new GenericType<List<MetadataInformation>>() {
+            });
         }
-        dataList = xml.request().header("token", token).get(new GenericType<List<MetadataInformation>>() {
-        });
-
     }
 
     public void resetData() {
@@ -105,80 +101,83 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     }
 
     public void getDetails() {
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target(REST_URL);
-        WebTarget xml = base.path("xml");
-        xml = xml.path("bnumber").path(currentNumber);
-        detailList = xml.request().header("token", token).get(new GenericType<List<MetadataInformation>>() {
-        });
+        try (Client client = ClientBuilder.newClient()) {
+            WebTarget base = client.target(restUrl);
+            WebTarget xml = base.path("xml");
+            xml = xml.path("bnumber").path(currentNumber);
+            detailList = xml.request().header("token", token).get(new GenericType<List<MetadataInformation>>() {
+            });
+        }
     }
 
     public void download() {
 
-        Client client = ClientBuilder.newClient();
-        WebTarget base = client.target(REST_URL);
-        WebTarget csv = base.path("csv");
-        if (includeOutdatedData) {
-            csv = csv.path("withinactive");
-        }
-
-        if (startDate != null && endDate != null) {
-            String start = dateConverter.format(startDate);
-            String end = dateConverter.format(endDate);
-            csv = csv.path(start).path(end);
-        }
-        csv = csv.queryParam("token", token);
-        try {
-            ExternalContext ec = FacesContextHelper.getCurrentFacesContext().getExternalContext();
-
-            ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the
-            // buffer beforehand. We want to get rid of them, else it may collide.
-            ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types.
-            // Use if necessary ExternalContext#getMimeType() for auto-detection
-            // based on filename.
-            ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As
-            // popup magic
-            // is done here.
-            // You can give
-            // it any file
-            // name you
-            // want, this
-            // only won't
-            // work in MSIE,
-            // it will use
-            // current
-            // request URL
-            // as file name
-            // instead.
-
-            OutputStream outStream = ec.getResponseOutputStream();
-
-            @Cleanup
-            InputStream inStream = csv.getUri().toURL().openStream();
-
-            byte[] buffer = new byte[1024];
-
-            int length;
-
-            while ((length = inStream.read(buffer)) > 0) {
-                outStream.write(buffer, 0, length);
+        try (Client client = ClientBuilder.newClient()) {
+            WebTarget base = client.target(restUrl);
+            WebTarget csv = base.path("csv");
+            if (includeOutdatedData) {
+                csv = csv.path("withinactive");
             }
-            FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to
-            // render the response which obviously will
-            // fail since it's already written with a
-            // file and closed.
 
-        } catch (IOException e) {
+            if (startDate != null && endDate != null) {
+                String start = dateConverter.format(startDate);
+                String end = dateConverter.format(endDate);
+                csv = csv.path(start).path(end);
+            }
+            csv = csv.queryParam("token", token);
+            try {
+                ExternalContext ec = FacesContextHelper.getCurrentFacesContext().getExternalContext();
+
+                ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the
+                // buffer beforehand. We want to get rid of them, else it may collide.
+                ec.setResponseContentType("text/csv"); // Check http://www.iana.org/assignments/media-types for all types.
+                // Use if necessary ExternalContext#getMimeType() for auto-detection
+                // based on filename.
+                ec.setResponseHeader("Content-Disposition", "attachment; filename=\"counterscript.csv\""); // The Save As
+                // popup magic
+                // is done here.
+                // You can give
+                // it any file
+                // name you
+                // want, this
+                // only won't
+                // work in MSIE,
+                // it will use
+                // current
+                // request URL
+                // as file name
+                // instead.
+
+                OutputStream outStream = ec.getResponseOutputStream();
+
+                @Cleanup
+                InputStream inStream = csv.getUri().toURL().openStream();
+
+                byte[] buffer = new byte[1024];
+
+                int length;
+
+                while ((length = inStream.read(buffer)) > 0) {
+                    outStream.write(buffer, 0, length);
+                }
+                FacesContextHelper.getCurrentFacesContext().responseComplete(); // Important! Otherwise JSF will attempt to
+                // render the response which obviously will
+                // fail since it's already written with a
+                // file and closed.
+
+            } catch (IOException e) {
+                Log.error(e);
+            }
         }
     }
 
     public List<MetadataInformation> getPaginatorList() {
         List<MetadataInformation> subList = new ArrayList<>();
         if (dataList != null) {
-            if (dataList.size() > (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE) {
-                subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, (pageNo * NUMBER_OF_OBJECTS_PER_PAGE) + NUMBER_OF_OBJECTS_PER_PAGE);
+            if (dataList.size() > (pageNo * entriesPerPage) + entriesPerPage) {
+                subList = dataList.subList(pageNo * entriesPerPage, (pageNo * entriesPerPage) + entriesPerPage);
             } else {
-                subList = dataList.subList(pageNo * NUMBER_OF_OBJECTS_PER_PAGE, dataList.size());
+                subList = dataList.subList(pageNo * entriesPerPage, dataList.size());
             }
         }
         return subList;
@@ -228,8 +227,8 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     }
 
     public int getLastPageNumber() {
-        int ret = new Double(Math.floor(this.dataList.size() / NUMBER_OF_OBJECTS_PER_PAGE)).intValue();
-        if (this.dataList.size() % NUMBER_OF_OBJECTS_PER_PAGE == 0) {
+        int ret = Double.valueOf(Math.floor(this.dataList.size() / entriesPerPage)).intValue();
+        if (this.dataList.size() % entriesPerPage == 0) {
             ret--;
         }
         return ret;
@@ -244,7 +243,7 @@ public @Data class CounterscriptPlugin implements IAdministrationPlugin, IPlugin
     }
 
     public boolean hasNextPage() {
-        return this.dataList.size() > NUMBER_OF_OBJECTS_PER_PAGE;
+        return this.dataList.size() > entriesPerPage;
     }
 
     public boolean hasPreviousPage() {

@@ -4,7 +4,6 @@
 	xmlns:composite="http://xmlns.jcp.org/jsf/composite"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:x="http://myfaces.apache.org/tomahawk"
 	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
 	<composite:interface>
@@ -33,9 +32,6 @@
 							<h:outputText value="#{msgs.filter}" />
 						</span>
 					</h:commandLink>
-					<!--                                 <h:commandLink styleClass="btn font-size-s" id="cancel" action="#{AdministrationForm.administrationPlugin.resetData}" immediate="true"> -->
-					<!--                                     <h:outputText value="#{msgs.clear}" /> -->
-					<!--                                 </h:commandLink> -->
 				</div>
 			</intranda:box>
 			<h:panelGroup
@@ -55,78 +51,78 @@
 						<div class="gw-table">
 							<div class="gw-table__wrapper">
 								<!-- Datentabelle -->
-								<x:dataTable
+								<h:dataTable
 									id="counterscriptTable"
 									styleClass="table table-hover table-bordered"
 									var="item"
 									value="#{AdministrationForm.administrationPlugin.paginatorList}">
-									<x:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
+									<h:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.id}" />
 										</f:facet>
 										<h:outputText value="#{item.id}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.creationDate}" />
 										</f:facet>
 										<h:outputText value="#{item.creationDate}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.modificationDate}" />
 										</f:facet>
 										<h:outputText value="#{item.modificationDate}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.deletionDate}" />
 										</f:facet>
 										<h:outputText value="#{item.deletionDate}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.filename}" />
 										</f:facet>
 										<h:outputText value="#{item.filename}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.bnumber}" />
 										</f:facet>
 										<h:outputText value="#{item.bnumber}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.material}" />
 										</f:facet>
 										<h:outputText value="#{item.material}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.accessStatus}" />
 										</f:facet>
 										<h:outputText value="#{item.accessStatus}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.accessLicence}" />
 										</f:facet>
 										<h:outputText value="#{item.accessLicence}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.playerPermissions}" />
 										</f:facet>
 										<h:outputText value="#{item.playerPermissions}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.status}" />
 										</f:facet>
 										<h:outputText value="#{item.status}" />
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.active}" />
 										</f:facet>
@@ -140,8 +136,8 @@
 												aria-hidden="true"
 												class="fa fa-check-circle font-green" />
 										</h:panelGroup>
-									</x:column>
-									<x:column styleClass="#{item.active ? 'inactive':'active'}">
+									</h:column>
+									<h:column styleClass="#{item.active ? 'inactive':'active'}">
 										<f:facet name="header">
 											<h:outputText value="#{msgs.details}" />
 										</f:facet>
@@ -155,8 +151,8 @@
 												target="#{AdministrationForm.administrationPlugin.currentNumber}"
 												value="#{item.bnumber}" />
 										</h:commandLink>
-									</x:column>
-								</x:dataTable>
+									</h:column>
+								</h:dataTable>
 							</div>
 						</div>
 						<div class="box__actions">
@@ -187,20 +183,20 @@
 								</h:commandLink>
 								<div class="margin-sides-10">
 									<!-- aktuelle Seite anzeigen -->
-									<x:outputText id="txtMoveTo1" forceId="true"
+									<h:outputText id="txtMoveTo1" forceId="true"
 										value="#{msgs.seite} #{AdministrationForm.administrationPlugin.pageNumberCurrent} #{msgs.von} #{AdministrationForm.administrationPlugin.pageNumberLast}"
 										onclick="document.getElementById('txtMoveTo2').style.display='inline';
 											document.getElementById('txtMoveTo1').style.display='none';
 											document.getElementById('txtMoveTo2').focus();
 											document.getElementById('txtMoveTo2').select();" />
 									<!-- Seite direkt anspringen -->
-									<x:inputText id="txtMoveTo2" forceId="true"
+									<h:inputText id="txtMoveTo2" forceId="true"
 										value="#{AdministrationForm.administrationPlugin.txtMoveTo}"
 										style="display:none;font-size:9px;width:30px" required="true"
 										onblur="document.getElementById('txtMoveTo2').style.display='none';
 												document.getElementById('txtMoveTo1').style.display='inline';"
 										onkeypress="return submitEnter('cmdMoveTo',event)" />
-									<x:commandButton action="#{NavigationForm.Reload}" id="cmdMoveTo" forceId="true"
+									<h:commandButton action="#{NavigationForm.Reload}" id="cmdMoveTo" forceId="true"
 										value="go" style="display:none" />
 								</div>
 								<h:commandLink styleClass="btn btn-primary"
@@ -241,76 +237,76 @@
 					<!-- Datentabelle -->
 					<div class="gw-table">
 						<div class="gw-table__wrapper">
-							<x:dataTable
+							<h:dataTable
 								styleClass="table table-hover table-bordered"
 								var="item" value="#{AdministrationForm.administrationPlugin.detailList}">
-								<x:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
+								<h:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.id}" />
 									</f:facet>
 									<h:outputText value="#{item.id}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.creationDate}" />
 									</f:facet>
 									<h:outputText value="#{item.creationDate}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.modificationDate}" />
 									</f:facet>
 									<h:outputText value="#{item.modificationDate}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.deletionDate}" />
 									</f:facet>
 									<h:outputText value="#{item.deletionDate}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}" rendered="false">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.filename}" />
 									</f:facet>
 									<h:outputText value="#{item.filename}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.bnumber}" />
 									</f:facet>
 									<h:outputText value="#{item.bnumber}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.material}" />
 									</f:facet>
 									<h:outputText value="#{item.material}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.accessStatus}" />
 									</f:facet>
 									<h:outputText value="#{item.accessStatus}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.accessLicence}" />
 									</f:facet>
 									<h:outputText value="#{item.accessLicence}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.playerPermissions}" />
 									</f:facet>
 									<h:outputText value="#{item.playerPermissions}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.status}" />
 									</f:facet>
 									<h:outputText value="#{item.status}" />
-								</x:column>
-								<x:column styleClass="#{item.active ? 'inactive':'active'}">
+								</h:column>
+								<h:column styleClass="#{item.active ? 'inactive':'active'}">
 									<f:facet name="header">
 										<h:outputText value="#{msgs.active}" />
 									</f:facet>
@@ -324,8 +320,8 @@
 											aria-hidden="true"
 											class="fa fa-check-circle font-green font-size-l" />
 									</h:panelGroup>
-							</x:column>
-							</x:dataTable>
+							</h:column>
+							</h:dataTable>
 						</div>
 					</div>
 					<div class="box__actions">
