@@ -40,6 +40,8 @@ import ugh.fileformats.mets.MetsMods;
 @PluginImplementation
 public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
 
+    private static final long serialVersionUID = -4478973187665181921L;
+
     private String bnumber;
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
