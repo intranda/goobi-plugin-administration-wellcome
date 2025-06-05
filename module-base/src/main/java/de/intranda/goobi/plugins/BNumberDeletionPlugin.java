@@ -171,8 +171,6 @@ public class BNumberDeletionPlugin implements IAdministrationPlugin, IPlugin {
         process.setDocket(template.getDocket());
 
         bHelper.SchritteKopieren(template, process);
-        bHelper.ScanvorlagenKopieren(template, process);
-        bHelper.WerkstueckeKopieren(template, process);
         bHelper.EigenschaftenKopieren(template, process);
 
         // create simple mets file - monograph or mmo/monographic manifestation
