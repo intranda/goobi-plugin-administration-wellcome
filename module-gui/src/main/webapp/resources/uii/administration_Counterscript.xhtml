@@ -5,13 +5,14 @@
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
-	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:util="http://goobi.io/util">
 	<composite:interface>
 	</composite:interface>
 	<composite:implementation>
 		<h:form id="counterscript" prependId="false" styleClass="flow">
 			<intranda:box
-				icon="fa fa-plug"
+				icon="plug"
 				title="#{msgs[AdministrationForm.administrationPlugin.title]}"
 				boxForm="true"
 				boxPadding="false"
@@ -27,7 +28,7 @@
 						styleClass="btn btn-neutral-600"
 						id="absenden"
 						action="#{AdministrationForm.administrationPlugin.getData}">
-						<span class="fa fa-filter" />
+						<util:icon icon="filter" />
 						<span>
 							<h:outputText value="#{msgs.filter}" />
 						</span>
@@ -37,7 +38,7 @@
 			<h:panelGroup
 				rendered="#{AdministrationForm.administrationPlugin.detailList == null and AdministrationForm.administrationPlugin.dataList != null}">
 				<intranda:box
-					icon="fa fa-table"
+					icon="table"
 					title="#{msgs.records}"
 					boxForm="false"
 					boxPadding="false"
@@ -127,14 +128,10 @@
 											<h:outputText value="#{msgs.active}" />
 										</f:facet>
 										<h:panelGroup class="" rendered="#{!item.active}">
-											<span
-												aria-hidden="true"
-												class="fa fa-times-circle font-red" />
+											<util:icon icon="circle-x" styleClass="icon--danger" />
 										</h:panelGroup>
 										<h:panelGroup rendered="#{item.active}">
-											<span
-												aria-hidden="true"
-												class="fa fa-check-circle font-green" />
+											<util:icon icon="circle-check" styleClass="icon--success" />
 										</h:panelGroup>
 									</h:column>
 									<h:column styleClass="#{item.active ? 'inactive':'active'}">
@@ -144,9 +141,7 @@
 										<h:commandLink styleClass="btn font-size-s" id="cancel"
 											action="#{AdministrationForm.administrationPlugin.getDetails}" immediate="true"
 											title="#{msgs.details}">
-											<span
-												aria-hidden="true"
-												class="fa fa-file-text-o" />
+											<util:icon icon="file-text" />
 											<f:setPropertyActionListener
 												target="#{AdministrationForm.administrationPlugin.currentNumber}"
 												value="#{item.bnumber}" />
@@ -161,23 +156,19 @@
 								id="download"
 								action="#{AdministrationForm.administrationPlugin.download}"
 								immediate="true">
-								<span class="fa fa-download" />
+								<util:icon icon="download" />
 								<h:outputText value="#{msgs.downloadCsv}" />
 							</h:commandLink>
 							<div class="dataTables_paginate">
 								<!-- paginator -->
 								<h:commandLink styleClass="btn btn-blank"
 									action="#{AdministrationForm.administrationPlugin.cmdMoveFirst}">
-									<span
-										aria-hidden="true"
-										class="fa fa-double-angle-left" />
+									<util:icon icon="chevrons-left" />
 									<f:ajax execute="@form" render="@form :qaform" />
 								</h:commandLink>
 								<h:commandLink styleClass="btn btn-primary"
 									action="#{AdministrationForm.administrationPlugin.cmdMovePrevious}">
-									<span
-										aria-hidden="true"
-										class="fa fa-angle-left" />
+									<util:icon icon="chevron-left" />
 									<f:ajax execute="@form" render="@form :qaform" />
 									<h:outputText value=" #{msgs.pagePrevious}" />
 								</h:commandLink>
@@ -202,16 +193,12 @@
 								<h:commandLink styleClass="btn btn-primary"
 									action="#{AdministrationForm.administrationPlugin.cmdMoveNext}">
 									<h:outputText value="#{msgs.pageNext} " />
-									<span
-										aria-hidden="true"
-										class="fa fa-angle-right" />
+									<util:icon icon="chevron-right" />
 									<f:ajax execute="@form" render="@form :qaform" />
 								</h:commandLink>
 								<h:commandLink styleClass="btn btn-blank"
 									action="#{AdministrationForm.administrationPlugin.cmdMoveLast}">
-									<span
-										aria-hidden="true"
-										class="fa fa-double-angle-right" />
+									<util:icon icon="chevrons-right" />
 									<f:ajax execute="@form" render="@form :qaform" />
 								</h:commandLink>
 								<!-- /paginator -->
@@ -223,7 +210,7 @@
 		</h:form>
 		<h:panelGroup rendered="#{AdministrationForm.administrationPlugin.detailList != null}">
 			<intranda:box
-				icon="fa fa-table"
+				icon="table"
 				title="#{msgs.details}"
 				boxForm="false"
 				boxPadding="false"
@@ -311,14 +298,10 @@
 										<h:outputText value="#{msgs.active}" />
 									</f:facet>
 									<h:panelGroup class="" rendered="#{!item.active}">
-										<span
-											aria-hidden="true"
-											class="fa fa-times-circle font-red" />
+										<util:icon icon="circle-x" styleClass="icon--danger" />
 									</h:panelGroup>
 									<h:panelGroup rendered="#{item.active}">
-										<span
-											aria-hidden="true"
-											class="fa fa-check-circle font-green font-size-l" />
+										<util:icon icon="circle-check" styleClass="icon--success icon--lg" />
 									</h:panelGroup>
 							</h:column>
 							</h:dataTable>
@@ -331,9 +314,7 @@
 								id="cancel"
 								action="#{AdministrationForm.administrationPlugin.resetData}"
 								immediate="true">
-								<span
-									aria-hidden="true"
-									class="fa fa-reply" />
+								<util:icon icon="arrow-back-up" />
 								<h:outputText value="#{msgs.backToHitlist}" />
 							</h:commandLink>
 						</h:form>
