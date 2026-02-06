@@ -6,7 +6,8 @@
     xmlns:f="http://xmlns.jcp.org/jsf/core"
     xmlns:x="http://myfaces.apache.org/tomahawk"
     xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
-    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+    xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+    xmlns:util="http://goobi.io/util">
     <composite:interface>
     </composite:interface>
     <composite:implementation>
@@ -15,7 +16,7 @@
             prependId="false"
             styleClass="form-horizontal form-bordered">
             <intranda:box
-                icon="fa fa-plug"
+                icon="plug"
                 title="#{msgs[AdministrationForm.administrationPlugin.title]}"
                 boxForm="true"
                 boxPadding="false"
@@ -32,9 +33,7 @@
                         styleClass="btn btn-blank"
                         action="#{AdministrationForm.administrationPlugin.deleteFromGoobiAndPlayer}"
                         onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-                        <span
-                            aria-hidden="true"
-                            class="fa fa-trash-o" />
+                        <util:icon icon="trash" />
                         <span>
                             <h:outputText value="#{msgs.deleteFromGoobiAndStorageService}" />
                         </span>
@@ -43,9 +42,7 @@
                         styleClass="btn btn-blank"
                         action="#{AdministrationForm.administrationPlugin.deleteFromPlayer}"
                         onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-                        <span
-                            aria-hidden="true"
-                            class="fa fa-trash-o" />
+                        <util:icon icon="trash" />
                         <span>
                             <h:outputText value="#{msgs.deleteFromStorageService}" />
                         </span>
@@ -54,9 +51,7 @@
                         styleClass="btn btn-neutral-600"
                         action="#{AdministrationForm.administrationPlugin.deleteFromGoobi}"
                         onclick="if (!confirm('#{msgs.sollDieserEintragWirklichGeloeschtWerden}')) return false">
-                        <span
-                            aria-hidden="true"
-                            class="fa fa-trash-o" />
+                        <util:icon icon="trash" />
                         <span>
                             <h:outputText value="#{msgs.deleteFromGoobi}" />
                         </span>
